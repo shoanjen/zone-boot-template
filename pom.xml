@@ -11,20 +11,20 @@
         <relativePath/>
     </parent>
 
-    <groupId>cn.shoanadmin</groupId>
-    <artifactId>shoan-boot</artifactId>
+    <groupId>com.zone.boot</groupId>
+    <artifactId>zone-boot</artifactId>
     <version>1.0.0-SNAPSHOT</version>
     <packaging>pom</packaging>
-    <name>shoan-boot</name>
+    <name>zone-boot</name>
     <description>Multi-module Spring Boot 3 project: common, domain, infrastructure, service, web, application</description>
 
     <modules>
-        <module>shoan-boot-common</module>
-        <module>shoan-boot-domain</module>
-        <module>shoan-boot-infrastructure</module>
-        <module>shoan-boot-service</module>
-        <module>shoan-boot-web</module>
-        <module>shoan-boot-application</module>
+        <module>zone-boot-common</module>
+        <module>zone-boot-domain</module>
+        <module>zone-boot-infrastructure</module>
+        <module>zone-boot-service</module>
+        <module>zone-boot-web</module>
+        <module>zone-boot-application</module>
     </modules>
 
     <properties>
