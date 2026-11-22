@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.zone.boot</groupId>
+        <artifactId>zone-boot</artifactId>
+        <version>1.0.0-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>zone-boot-bootstrap</artifactId>
+    <name>zone-boot-bootstrap</name>
+    <packaging>jar</packaging>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.zone.boot</groupId>
+            <artifactId>zone-boot-web</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.zone.boot</groupId>
+            <artifactId>zone-boot-service</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <!-- 装配根显式聚合基础设施层：注入仓储/网关实现（web/service 不依赖 infrastructure，
+             由本模块完成依赖倒置的运行期装配） -->
+        <dependency>
+            <groupId>com.zone.boot</groupId>
+            <artifactId>zone-boot-infrastructure</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <!-- Zone 中间件全量套件（common/log/redis/database/http/security 一次引入；
+             suite 为 pom 聚合坐标，须声明 type=pom，见接入手册 3.2） -->
+        <dependency>
+            <groupId>com.zone.middleware</groupId>
+            <artifactId>zone-middleware-suite</artifactId>
+            <type>pom</type>
+        </dependency>
+        <!-- MySQL 驱动：接入手册 7.1 要求上游自行引入（版本随 Boot 3.3.5 BOM） -->
+        <dependency>
+            <groupId>com.mysql</groupId>
+            <artifactId>mysql-connector-j</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+        </dependency>
+
+        <!-- 测试：ArchUnit 分层守护（规则见 DddLayerRulesTest）+ Boot 测试基建 -->
+        <dependency>
+            <groupId>com.tngtech.archunit</groupId>
+            <artifactId>archunit-junit5</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <mainClass>com.zone.boot.bootstrap.ZoneBootApplication</mainClass>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>

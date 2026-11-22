@@ -34,10 +34,10 @@
             <artifactId>zone-boot-service</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <!-- Zone 中间件：接入层日志 ZoneLog（GlobalExceptionHandler 使用；自动传递 common） -->
         <dependency>
-            <groupId>com.zone.boot</groupId>
-            <artifactId>zone-boot-infrastructure</artifactId>
-            <version>${project.version}</version>
+            <groupId>com.zone.middleware</groupId>
+            <artifactId>zone-middleware-log</artifactId>
         </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>

@@ -15,22 +15,11 @@
     <packaging>jar</packaging>
 
     <dependencies>
+        <!-- DDD 领域层：框架无关（禁 Spring / MyBatis-Plus / 中间件依赖，ArchUnit 守护）。
+             纯 POJO 实体/值对象 + 仓储/防腐接口；持久化与外部实现一律下沉 infrastructure -->
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>com.zone.boot</groupId>
-            <artifactId>zone-boot-common</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-
-        <!-- MyBatis-Plus annotations for entity compilation -->
-        <dependency>
-            <groupId>com.baomidou</groupId>
-            <artifactId>mybatis-plus-annotation</artifactId>
-            <version>${mybatis-plus.version}</version>
         </dependency>
     </dependencies>
 </project>

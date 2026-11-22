@@ -1,0 +1,31 @@
+# 测试环境配置
+server:
+  port: 8081
+
+# 连接信息使用 Spring Boot 官方键（zone-middleware 已去方言化）
+spring:
+  datasource:
+    # 测试环境使用 H2 内存数据库；派生项目启用 test profile 时需自行添加 com.h2:h2 依赖
+    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+  data:
+    redis:
+      # 测试环境使用 db 15
+      host: localhost
+      port: 6379
+      database: 15
+
+# 日志配置
+logging:
+  level:
+    root: WARN
+    com.zone.boot: INFO
+    org.springframework.test: INFO
+  pattern:
+    console: "%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
+
+# 禁用Knife4j
+knife4j:
+  enable: false

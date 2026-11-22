@@ -16,13 +16,17 @@
 
     <dependencies>
 
+        <!-- Zone 中间件：数据源（HikariCP/Druid）+ MyBatis-Plus + Flyway；
+             连接/池/迁移走官方键 spring.datasource.* / spring.flyway.*，
+             zone 键仅行为项（mode、mybatis.mapper-package/pagination），见接入手册 §7.2 -->
         <dependency>
-            <groupId>com.baomidou</groupId>
-            <artifactId>mybatis-plus-boot-starter</artifactId>
+            <groupId>com.zone.middleware</groupId>
+            <artifactId>zone-middleware-database</artifactId>
         </dependency>
+        <!-- Zone 中间件：出站 HTTP 模板 ZoneHttpTemplate（外部网关实现使用；自动传递 common/log） -->
         <dependency>
-            <groupId>org.mybatis</groupId>
-            <artifactId>mybatis-spring</artifactId>
+            <groupId>com.zone.middleware</groupId>
+            <artifactId>zone-middleware-http</artifactId>
         </dependency>
         <dependency>
             <groupId>com.zone.boot</groupId>

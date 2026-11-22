@@ -1,0 +1,70 @@
+# 生产环境配置
+server:
+  port: 8212
+  compression:
+    enabled: true
+    mime-types: text/html,text/xml,text/plain,text/css,text/javascript,application/javascript,application/json
+    min-response-size: 1024
+
+# 连接信息使用 Spring Boot 官方键（生产环境经环境变量注入，不落明文）
+spring:
+  datasource:
+    url: jdbc:mysql://${DB_HOST:localhost}:${DB_PORT:3306}/${DB_NAME:zone_boot_template}?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8&allowPublicKeyRetrieval=true
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  data:
+    redis:
+      host: ${REDIS_HOST}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD}
+      database: ${REDIS_DATABASE:0}
+      lettuce:
+        pool:
+          max-active: 20
+          max-idle: 10
+          min-idle: 5
+
+zone:
+  middleware:
+    # 部署模式预设（CLOUD：保守超时/TCP 保活；db 泄漏检测关）——连接信息见上方官方键
+    db:
+      mode: CLOUD
+    redis:
+      mode: CLOUD
+
+# 日志配置
+logging:
+  level:
+    root: INFO
+    com.zone.boot: INFO
+    org.springframework.web: WARN
+  pattern:
+    file: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n"
+  file:
+    name: /var/log/zone-boot-template/application.log
+    max-size: 200MB
+    max-history: 60
+  logback:
+    rollingpolicy:
+      max-file-size: 200MB
+      total-size-cap: 5GB
+
+# 禁用Knife4j
+knife4j:
+  enable: false
+
+# 应用监控配置
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+      base-path: /actuator
+  endpoint:
+    health:
+      show-details: never
+  metrics:
+    export:
+      prometheus:
+        enabled: true

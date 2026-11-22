@@ -1,0 +1,133 @@
+server:
+  port: 8212
+  servlet:
+    context-path: /
+    encoding:
+      charset: UTF-8
+      enabled: true
+      force: true
+
+spring:
+  profiles:
+    active: dev
+
+  application:
+    name: zone-boot-template
+
+  # 数据源（Spring Boot 官方键；zone-middleware 基于本块装配数据源，url 必填缺失启动失败）
+  datasource:
+    url: jdbc:mysql://localhost:3306/zone_boot_template?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=false&serverTimezone=GMT%2B8&allowPublicKeyRetrieval=true
+    username: root
+    password: rootroot
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    # type: com.alibaba.druid.pool.DruidDataSource   # 切 Druid（缺省 HikariCP）
+
+  # Flyway 迁移（官方键；模板默认关闭，派生项目改 true 并将建表脚本放 classpath:db/migration）
+  flyway:
+    enabled: false
+
+  # Redis（Spring Boot 官方键；超时/池参数未配置时自动取 zone.middleware.redis.mode 预设）
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:}   # 无密码留空
+      database: ${REDIS_DATABASE:0}  # 与其他应用以 db index 隔离
+      # TLS 按需开启：ssl.enabled: true（Boot 3.1+ 为对象键，缺省关闭）
+
+# MyBatis-Plus配置（SqlSessionFactory 由标准 MybatisPlusAutoConfiguration 基于 zone 数据源构建，本块继续生效）
+mybatis-plus:
+  configuration:
+    map-underscore-to-camel-case: true
+    cache-enabled: false
+    call-setters-on-nulls: true
+    jdbc-type-for-null: 'null'
+    log-impl: org.apache.ibatis.logging.slf4j.Slf4jImpl
+  mapper-locations: classpath:/mapper/*.xml
+  # type-aliases-package: 指向 infrastructure 的 DO 包（如 com.zone.boot.infrastructure.persistence.dataobject）
+  global-config:
+    db-config:
+      id-type: ASSIGN_ID
+      logic-delete-field: deleted
+      logic-delete-value: 1
+      logic-not-delete-value: 0
+      update-strategy: NOT_NULL
+      insert-strategy: NOT_NULL
+      select-strategy: NOT_EMPTY
+
+# Zone 中间件配置（zone-middleware-support 二方包；接入手册见该项目 docs/接入手册.md）
+zone:
+  middleware:
+    # 统一日志门面 ZoneLog（TEXT 行格式：应用名|环境|traceId|reqId|类名.方法名|消息）
+    log:
+      format: TEXT
+      level: INFO
+    # 数据库部署模式预设（LOCAL：泄漏检测开/短超时；CLOUD：保守超时/保活）；连接信息走 spring.datasource.* 官方键
+    db:
+      mode: LOCAL                    # LOCAL / CLOUD
+      mybatis:
+        pagination-enabled: true     # 分页插件默认装配（方言自动识别）
+        # mapper-package: com.zone.boot.infrastructure.persistence.mapper  # 配置后自动扫描注册 Mapper（本项目用主类 @MapperScan，二者取一）
+    # Redis 部署模式预设（LOCAL/CLOUD：超时与 TCP 保活开关）；连接信息走 spring.data.redis.* 官方键
+    redis:
+      mode: LOCAL                    # LOCAL / CLOUD
+    # 接口签名鉴权（suite 已包含 security 模块）：
+    # 模板默认关闭签名校验；派生项目启用时改 true 并必配 zone.middleware.security.sign.secret
+    # （缺失启动失败），端点标注 @ZoneSignCheck（手册 §9）
+    security:
+      sign:
+        enabled: false
+    # Web 入站支撑（手册 §10，均默认关）：全局异常处理器（ZoneBusinessException 原码透传/
+    # 参数校验转 BIZ-4001/兜底 SYS-9999，@Order 最低可被上游 advice 覆盖）+ Trace 入站 Filter
+    # （Zone-Trace-Id 头透传/缺失生成、reqId 生成、请求结束清理、响应头回写）
+    web:
+      exception-advice-enabled: true
+      trace-filter-enabled: true
+    # 统一 HTTP 模板 ZoneHttpTemplate（JDK HttpClient；默认并发 64，重试/熔断默认关闭）
+    http:
+      connect-timeout: 5s
+      read-timeout: 10s
+
+# 日志配置
+logging:
+  level:
+    com.zone.boot.service: DEBUG
+    org.springframework.web: DEBUG
+  pattern:
+    console: "%clr(%d{yyyy-MM-dd HH:mm:ss.SSS}){faint} %clr(${LOG_LEVEL_PATTERN:-%5p}) %clr(${PID:- }){magenta} %clr(---){faint} %clr([%15.15t]){faint} %clr(%-40.40logger{39}){cyan} %clr(:){faint} %m%n${LOG_EXCEPTION_CONVERSION_WORD:-%wEx}"
+    file: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n"
+  file:
+    name: logs/zone-boot-template.log
+    max-size: 100MB
+    max-history: 30
+
+# 应用监控配置
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+      base-path: /actuator
+  endpoint:
+    health:
+      show-details: when-authorized
+  prometheus:
+    metrics:
+      export:
+        enabled: true
+
+# Knife4j API文档配置
+knife4j:
+  enable: true
+  openapi:
+    title: Zone Boot Template API
+    description: Spring Boot 3 多模块后端模板接口文档
+    version: 1.0.0
+    concat: zoneboot@example.com
+    license: Apache 2.0
+    license-url: https://www.apache.org/licenses/LICENSE-2.0.html
+  setting:
+    language: zh_cn
+    enable-swagger-models: true
+    enable-document-manage: true
+    swagger-model-name: 实体类列表

@@ -15,11 +15,8 @@
     <packaging>jar</packaging>
 
     <dependencies>
-        <dependency>
-            <groupId>com.zone.boot</groupId>
-            <artifactId>zone-boot-common</artifactId>
-            <version>${project.version}</version>
-        </dependency>
+        <!-- DDD 应用层：只依赖领域层（依赖倒置）——数据访问经 domain 仓储接口，
+             由 infrastructure 在装配期注入实现，本模块禁止依赖 infrastructure（ArchUnit 守护） -->
         <dependency>
             <groupId>com.zone.boot</groupId>
             <artifactId>zone-boot-domain</artifactId>
@@ -27,8 +24,18 @@
         </dependency>
         <dependency>
             <groupId>com.zone.boot</groupId>
-            <artifactId>zone-boot-infrastructure</artifactId>
+            <artifactId>zone-boot-common</artifactId>
             <version>${project.version}</version>
+        </dependency>
+        <!-- Zone 中间件：应用层日志 ZoneLog（自动传递 common） -->
+        <dependency>
+            <groupId>com.zone.middleware</groupId>
+            <artifactId>zone-middleware-log</artifactId>
+        </dependency>
+        <!-- 应用层事务边界：@Transactional（版本随 Boot 3.3.5 BOM；spring-context 经 zone-middleware-log 传递） -->
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-tx</artifactId>
         </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>

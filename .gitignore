@@ -27,3 +27,7 @@ replay_pid*
 target/
 .DS_Store
 
+
+# Runtime logs & IDE-agent session metadata
+logs/
+.zcode/
