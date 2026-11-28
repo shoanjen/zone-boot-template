@@ -22,11 +22,21 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
     # type: com.alibaba.druid.pool.DruidDataSource   # 切 Druid（缺省 HikariCP）
 
-  # Flyway 迁移（官方键；模板默认关闭，派生项目改 true 并将建表脚本放 classpath:db/migration）
+  # Flyway 迁移（官方键；已开启——启动自动执行 classpath:db/migration，模板内置示例建表 V1__create_t_order.sql，
+  # 派生项目删除示例迁移后放自己的脚本）；存量库（有表无 flyway 历史）自动 baseline 到 0 后从 V1 起跑
   flyway:
-    enabled: false
+    enabled: true
+    baseline-on-migrate: true
+    baseline-version: 0
 
-  # Redis（Spring Boot 官方键；超时/池参数未配置时自动取 zone.middleware.redis.mode 预设）
+  # HTTP 出站客户端官方键（ZoneHttpTemplate 基于本块装配；未配置时兜底 5s/10s/follow-when-possible）
+  http:
+    client:
+      connect-timeout: 5s
+      read-timeout: 10s
+      redirects: follow-when-possible   # never / follow-when-possible
+
+  # Redis（Spring Boot 官方键；二方包 v1.66 后 zone.middleware.redis.* 已无键——连接/超时/池全部官方键）
   data:
     redis:
       host: ${REDIS_HOST:localhost}
@@ -34,6 +44,14 @@ spring:
       password: ${REDIS_PASSWORD:}   # 无密码留空
       database: ${REDIS_DATABASE:0}  # 与其他应用以 db index 隔离
       # TLS 按需开启：ssl.enabled: true（Boot 3.1+ 为对象键，缺省关闭）
+      connect-timeout: 2s            # 显式超时（原 LOCAL 预设值；生产建议加大至 10s，手册 §6.1）
+      timeout: 3s                    # 命令超时（同上）
+      lettuce:
+        pool:                        # 连接池需显式配置方启用（commons-pool2 已随二方包引入）
+          max-active: 8
+          max-idle: 8
+          min-idle: 0
+          max-wait: 2s
 
 # MyBatis-Plus配置（SqlSessionFactory 由标准 MybatisPlusAutoConfiguration 基于 zone 数据源构建，本块继续生效）
 mybatis-plus:
@@ -56,21 +74,14 @@ mybatis-plus:
       select-strategy: NOT_EMPTY
 
 # Zone 中间件配置（zone-middleware-support 二方包；接入手册见该项目 docs/接入手册.md）
+# 键面（手册 §12）：二方包 v1.66/v1.67 后 db/redis 已 100% 官方键（zone.middleware.{db,redis}.* 无键）；
+# http 超时/重定向迁官方 spring.http.client.*，并发/重试保留 zone 键；log/web/security 仍为 zone 键
 zone:
   middleware:
-    # 统一日志门面 ZoneLog（TEXT 行格式：应用名|环境|traceId|reqId|类名.方法名|消息）
+    # 统一日志门面 ZoneLog（TEXT 行格式：应用名|环境|traceId|类名.方法名|消息）
     log:
       format: TEXT
       level: INFO
-    # 数据库部署模式预设（LOCAL：泄漏检测开/短超时；CLOUD：保守超时/保活）；连接信息走 spring.datasource.* 官方键
-    db:
-      mode: LOCAL                    # LOCAL / CLOUD
-      mybatis:
-        pagination-enabled: true     # 分页插件默认装配（方言自动识别）
-        # mapper-package: com.zone.boot.infrastructure.persistence.mapper  # 配置后自动扫描注册 Mapper（本项目用主类 @MapperScan，二者取一）
-    # Redis 部署模式预设（LOCAL/CLOUD：超时与 TCP 保活开关）；连接信息走 spring.data.redis.* 官方键
-    redis:
-      mode: LOCAL                    # LOCAL / CLOUD
     # 接口签名鉴权（suite 已包含 security 模块）：
     # 模板默认关闭签名校验；派生项目启用时改 true 并必配 zone.middleware.security.sign.secret
     # （缺失启动失败），端点标注 @ZoneSignCheck（手册 §9）
@@ -83,10 +94,13 @@ zone:
     web:
       exception-advice-enabled: true
       trace-filter-enabled: true
-    # 统一 HTTP 模板 ZoneHttpTemplate（JDK HttpClient；默认并发 64，重试/熔断默认关闭）
+    # 统一 HTTP 模板 ZoneHttpTemplate（JDK HttpClient）：连接/读超时与重定向为官方键 spring.http.client.*（见上），
+    # 并发上限与重试无官方对应保留 zone 键；模板显式声明并发 64、重试默认关
     http:
-      connect-timeout: 5s
-      read-timeout: 10s
+      max-concurrent-requests: 64
+      # retry:
+      #   enabled: true            # 重试默认关（生产按需开启，参数见手册 §8.1）
+      #   max-attempts: 3
 
 # 日志配置
 logging:

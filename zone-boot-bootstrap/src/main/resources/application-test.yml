@@ -10,6 +10,9 @@ spring:
     driver-class-name: org.h2.Driver
     username: sa
     password:
+  # H2 与 MySQL 方言不兼容：test profile 关闭迁移（示例建表脚本 V1 为 MySQL 方言）
+  flyway:
+    enabled: false
   data:
     redis:
       # 测试环境使用 db 15

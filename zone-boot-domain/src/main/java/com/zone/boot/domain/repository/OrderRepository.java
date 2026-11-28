@@ -20,4 +20,7 @@ public interface OrderRepository {
 
     /** 按用户取订单列表（按下单时间倒序），无订单返回空列表 */
     List<Order> findByUserId(String userId);
+
+    /** 保存订单（新增或按订单号覆盖更新），返回保存后的领域对象 */
+    Order save(Order order);
 }

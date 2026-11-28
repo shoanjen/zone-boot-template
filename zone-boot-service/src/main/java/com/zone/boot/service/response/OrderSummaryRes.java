@@ -7,7 +7,7 @@ import lombok.Data;
 /**
  * 订单列表项响应（示例链路演示用）
  * 列表用例的瘦视图：同一 Order 实体在列表场景只暴露列表页需要的字段——
- * 裁剪逻辑在 OrderAssembler，不另建「列表专用领域模型」
+ * 裁剪逻辑在 OrderConverter，不另建「列表专用领域模型」
  */
 @Data
 @Builder

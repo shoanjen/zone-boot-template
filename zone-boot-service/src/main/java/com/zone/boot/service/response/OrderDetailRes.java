@@ -6,7 +6,7 @@ import lombok.Data;
 
 /**
  * 订单详情响应（示例链路演示用）
- * 详情用例的全量视图：字段由 OrderAssembler 从领域对象裁剪组装
+ * 详情用例的全量视图：字段由 OrderConverter 从领域对象裁剪组装
  */
 @Data
 @Builder

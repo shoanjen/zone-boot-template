@@ -88,7 +88,7 @@ class DddLayerRulesTest {
                 .check(classes);
     }
 
-    /** 规则 6：分层依赖方向总纲 —— web → service → domain ← infrastructure */
+    /** 规则 6：分层依赖方向总纲 —— web → service → domain ← infrastructure；装配根自由聚合各层 */
     @Test
     void 分层依赖方向应为_适配层到应用层到领域层_基础设施实现领域层() {
         layeredArchitecture().consideringAllDependencies()
@@ -96,11 +96,13 @@ class DddLayerRulesTest {
                 .layer("应用层").definedBy("com.zone.boot.service..")
                 .layer("领域层").definedBy("com.zone.boot.domain..")
                 .layer("基础设施层").definedBy("com.zone.boot.infrastructure..")
+                .layer("装配根").definedBy("com.zone.boot.bootstrap..")
 
-                .whereLayer("适配层").mayNotBeAccessedByAnyLayer()
-                .whereLayer("应用层").mayOnlyBeAccessedByLayers("适配层")
-                .whereLayer("领域层").mayOnlyBeAccessedByLayers("适配层", "应用层", "基础设施层")
-                .whereLayer("基础设施层").mayNotBeAccessedByAnyLayer() // 实现仅由 application 装配根在运行期注入
+                .whereLayer("适配层").mayOnlyBeAccessedByLayers("装配根")
+                .whereLayer("应用层").mayOnlyBeAccessedByLayers("适配层", "装配根")
+                .whereLayer("领域层").mayOnlyBeAccessedByLayers("适配层", "应用层", "基础设施层", "装配根")
+                .whereLayer("基础设施层").mayOnlyBeAccessedByLayers("装配根") // 实现由装配根运行期装配（组件扫描/显式 Bean）
+                .whereLayer("装配根").mayNotBeAccessedByAnyLayer()
                 .check(classes);
     }
 }

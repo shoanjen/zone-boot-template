@@ -1,5 +1,6 @@
 package com.zone.boot.domain.entity;
 
+import com.zone.boot.domain.event.OrderPaidEvent;
 import com.zone.boot.domain.valueobject.Money;
 import com.zone.boot.domain.valueobject.OrderStatus;
 
@@ -17,7 +18,8 @@ public class Order {
 
     private final String orderId;
     private final String userId;
-    private final OrderStatus status;
+    /** 订单状态（实体生命周期内可流转，pay() 收口状态迁移） */
+    private OrderStatus status;
     /** 订单总额 */
     private final Money totalAmount;
     /** 应付金额（优惠后） */
@@ -47,6 +49,21 @@ public class Order {
     /** 领域行为：当前是否可发起支付（状态规则在枚举里，实体做语义收口） */
     public boolean canPay() {
         return status.canPay();
+    }
+
+    /**
+     * 领域行为：支付订单 —— 状态流转守卫（仅「已创建」可支付）+ 产出领域事件；
+     * 状态迁移是实体生命周期的一部分，守卫失败抛 IllegalStateException，由应用层翻译为业务异常
+     *
+     * @param paidTimeMillis 支付时间（epoch 毫秒）
+     * @return 订单已支付领域事件
+     */
+    public OrderPaidEvent pay(long paidTimeMillis) {
+        if (!canPay()) {
+            throw new IllegalStateException("订单当前状态不可支付：" + status.getDescription());
+        }
+        this.status = OrderStatus.PAID;
+        return new OrderPaidEvent(orderId, userId, payableAmount, paidTimeMillis);
     }
 
     public String getOrderId() {

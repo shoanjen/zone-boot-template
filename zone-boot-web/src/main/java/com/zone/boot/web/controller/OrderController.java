@@ -1,6 +1,6 @@
 package com.zone.boot.web.controller;
 
-import com.zone.boot.service.OrderQueryAppService;
+import com.zone.boot.service.service.OrderQueryAppService;
 import com.zone.boot.service.request.OrderListReq;
 import com.zone.boot.service.request.OrderQueryReq;
 import com.zone.boot.service.response.OrderDetailRes;
